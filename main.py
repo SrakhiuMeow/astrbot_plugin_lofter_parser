@@ -18,17 +18,7 @@ class AstrbotPluginLofterParser(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
         self.lofter_cookie = config.get("lofter_cookie", "")
-
-
-    async def initialize(self):
-        logger.info("Lofter Parser Plugin is initializing...")
-        try:
-            import brotli
-            # logger.info("检测到brotli：", brotli.__version__)
-        except ImportError:
-            logger.error("Brotli未安装，可能是自动安装失败。请手动安装Brotli后重启Astrbot.")
-            return None
-        logger.info("Lofter解析插件初始化完成.")
+        self.pattern = re.compile(r"[a-zA-Z0-9-_]+\.lofter\.com/post/[a-zA-Z0-9-_]+")
 
 
     @filter.event_message_type(filter.EventMessageType.ALL, priority=10)
@@ -41,13 +31,12 @@ class AstrbotPluginLofterParser(Star):
         message_obj_str = str(event.message_obj)
 
         cookie = self.lofter_cookie if hasattr(self, "lofter_cookie") else ""
-        pattern = r"[a-zA-Z0-9-_]+\.lofter\.com/post/[a-zA-Z0-9-_]+"
 
         # 检查是否是回复消息，如果是则忽略
         if re.search(r"reply", message_str):
             return
 
-        matches = re.search(pattern, message_obj_str) or re.search(pattern, message_str)
+        matches = re.search(self.pattern, message_obj_str) or re.search(self.pattern, message_str)
 
         if not (matches):
             return

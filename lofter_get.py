@@ -1,5 +1,5 @@
 import asyncio
-import traceback
+from functools import partial
 
 import aiohttp
 from bs4 import BeautifulSoup
@@ -32,7 +32,9 @@ async def get_post(pageUrl: str, lofter_cookie: str, *, timeout: int = 10) -> di
                 text = await resp.text()
 
         # 解析页面内容，截取其中class="content"的div
-        soup = BeautifulSoup(text, "html.parser")
+        soup = await asyncio.get_running_loop().run_in_executor(
+            None, partial(BeautifulSoup, text, "html.parser")
+        )
         content_div = soup.find("div", class_="content")
         if not isinstance(content_div, Tag):
             return None
@@ -60,6 +62,7 @@ async def get_post(pageUrl: str, lofter_cookie: str, *, timeout: int = 10) -> di
         return result
 
     except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-        traceback.print_exc()
-        logger.error("获取或解析Lofter帖子时出错: %s: %s", type(e).__name__, e)
+        logger.error(
+            "获取或解析Lofter帖子时出错: %s: %s", type(e).__name__, e, exc_info=True
+        )
         return None
