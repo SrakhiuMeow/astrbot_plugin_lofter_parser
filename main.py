@@ -1,4 +1,3 @@
-import json
 import re
 
 import astrbot.api.message_components as Comp
@@ -25,7 +24,7 @@ class AstrbotPluginLofterParser(Star):
         logger.info("Lofter Parser Plugin is initializing...")
         try:
             import brotli
-            logger.info("检测到brotli：", brotli.__version__)
+            # logger.info("检测到brotli：", brotli.__version__)
         except ImportError:
             logger.error("Brotli未安装，可能是自动安装失败。请手动安装Brotli后重启Astrbot.")
             return None
@@ -36,8 +35,8 @@ class AstrbotPluginLofterParser(Star):
     async def auto_parse_lofter(self, event: AstrMessageEvent, *args, **kwargs):
         """自动解析 Lofter 链接的消息处理器"""
         if (event is None) or (not hasattr(event, "message_str")):
-            print("No message_str attribute in event.")
             return
+
         message_str = event.message_str
         message_obj_str = str(event.message_obj)
 
@@ -48,21 +47,21 @@ class AstrbotPluginLofterParser(Star):
         if re.search(r"reply", message_str):
             return
 
-        matches = re.search(pattern,message_obj_str) or re.search(pattern, message_str)
+        matches = re.search(pattern, message_obj_str) or re.search(pattern, message_str)
 
         if not (matches):
             return
 
-        for match in matches.groups():
-            result = await get_post("https://"+match, cookie, timeout=15)
-            logger.info("Lofter Parser result: %s", result)
-            if result:
-                images = result.get("images", [])
-                text = result.get("text", "")
-                chain = [
-                    Comp.At(qq=event.get_sender_id()),  # At 消息发送者
-                    Comp.Plain(text)
-                    ] + [
-                    Comp.Image.fromURL(url) for url in images  # 从 URL 发送图片
-                    ]
-                yield event.chain_result(chain)
+        logger.info("检测到Lofter URL: %s", matches.group(0))
+        result = await get_post("https://" + matches.group(0), cookie, timeout=15)
+        logger.info("Lofter Parser result: %s", result)
+        if result:
+            images = result.get("images", [])
+            text = result.get("text", "")
+            chain = [
+                Comp.At(qq=event.get_sender_id()),  # At 消息发送者
+                Comp.Plain(text)
+                ] + [
+                Comp.Image.fromURL(url) for url in images  # 从 URL 发送图片
+                ]
+            yield event.chain_result(chain)
