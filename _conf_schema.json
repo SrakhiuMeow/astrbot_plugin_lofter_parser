@@ -1,0 +1,7 @@
+{
+    "lofter_cookie":{
+        "description": "Lofter(乐乎)cookie",
+        "type": "string",
+        "default": ""
+        }
+}
