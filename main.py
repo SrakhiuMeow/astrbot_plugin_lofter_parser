@@ -32,13 +32,6 @@ class AstrbotPluginLofterParser(Star):
         logger.info("Lofter解析插件初始化完成.")
 
 
-    async def _save_tmp(self, result: dict):
-        """将结果保存到临时文件，返回文件路径列表"""
-        file_paths = []
-        json.dump(result, open("lofter_tmp.json", "w", encoding="utf-8"), ensure_ascii=False, indent=4)
-        return file_paths
-
-
     @filter.event_message_type(filter.EventMessageType.ALL, priority=10)
     async def auto_parse_lofter(self, event: AstrMessageEvent, *args, **kwargs):
         """自动解析 Lofter 链接的消息处理器"""
