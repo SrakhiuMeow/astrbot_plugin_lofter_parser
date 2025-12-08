@@ -21,7 +21,7 @@ class AstrbotPluginLofterParser(Star):
         super().__init__(context)
         self.lofter_cookie = config.get("lofter_cookie", "")
         self.pattern = re.compile(r"[a-zA-Z0-9-_]+\.lofter\.com/post/[a-zA-Z0-9-_]+")
-        logger.info("brotli version: %s", brotli.__version__)
+        logger.info("brotli found: %s", brotli)
 
     @filter.event_message_type(filter.EventMessageType.ALL, priority=10)
     async def auto_parse_lofter(self, event: AstrMessageEvent, *args, **kwargs):
