@@ -14,7 +14,7 @@ from .lofter_get import get_post
     "astrbot_plugin_lofter_parser",
     "SrakhiuMeow",
     "可以解析lofter链接，提取文字和图片内容",
-    "1.0",
+    "1.1",
 )
 class AstrbotPluginLofterParser(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
@@ -34,11 +34,14 @@ class AstrbotPluginLofterParser(Star):
 
         cookie = self.lofter_cookie if hasattr(self, "lofter_cookie") else ""
 
-        # 检查是否是回复消息，如果是则忽略
-        if re.search(r"reply", message_str):
-            return
+        # Ignore reply messages to avoid re-parsing Lofter links in quoted content.
+        for comp in event.get_messages():
+            if isinstance(comp, Comp.Reply):
+                return
 
-        matches = re.search(self.pattern, message_obj_str) or re.search(self.pattern, message_str)
+        matches = re.search(self.pattern, message_obj_str) or re.search(
+            self.pattern, message_str
+        )
 
         if not (matches):
             return
@@ -48,11 +51,14 @@ class AstrbotPluginLofterParser(Star):
         logger.info("Lofter Parser result: %s", result)
         if result:
             images = result.get("images", [])
+            videos = result.get("videos", [])
             text = result.get("text", "")
             chain = [
                 Comp.At(qq=event.get_sender_id()),  # At 消息发送者
-                Comp.Plain(text)
-                ] + [
-                Comp.Image.fromURL(url) for url in images  # 从 URL 发送图片
-                ]
+                Comp.Plain(text),
+            ]
+            for url in images:
+                chain.append(Comp.Image.fromURL(url))
+            for video in videos:
+                chain.append(Comp.Video.fromURL(video["src"]))
             yield event.chain_result(chain)

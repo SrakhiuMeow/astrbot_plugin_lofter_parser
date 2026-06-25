@@ -1,6 +1,6 @@
 name: astrbot_plugin_lofter_parser
 display_name: Lofter自动解析
 desc: 支持Lofter(乐乎)平台分享链接的自动解析
-version: v1.0
+version: v1.1
 author: SrakhiuMeow
 repo: https://github.com/SrakhiuMeow/astrbot_plugin_lofter_parser
